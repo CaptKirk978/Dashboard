@@ -3,44 +3,36 @@ library(bs4Dash)
 library(waiter)
 library(leaflet)
 library(vroom)
-library(tidygeocoder)
+library(dplyr)
+library(lubridate)
+
+######### Indy Incident map data ###########
+filesIncident <- list.files(path = "./indy/incidents/", pattern = "*.csv", full.names = T)
+
+rawIncidents <- vroom(filesIncident) %>% 
+  distinct(`id`, .keep_all = T) %>% 
+  rename("Lat" = "location.type",
+         "Long" = "location.coordinates",
+         "Address" = "incidentType")
+rawIncidents$Lat <- gsub(")", "", rawIncidents$Lat, fixed = T)
+rawIncidents$Long <- gsub("c(", "", rawIncidents$Long, fixed = T)
+
+agencies <- tibble("agencyId" = 109542,
+                   "Agency" = "IMPD")
+
+incidents <- agencies %>% 
+  left_join(rawIncidents, by = "agencyId") 
 
 
-incidentFiles <- list.files(path = "./IMPD/incidents/", pattern = "*.csv", full.names = T)
-
-incidents <- vroom(incidentFiles)
-
-incidents <- geocode(incidents, "blocksizedAddress", method = "arcgis")
-
-write.csv(incidents, file = "/IMPD/incidents/incidents_geocoded.csv")
-
-leaflet() %>% 
-  addTiles() %>% 
-  addMarkers(
-    lng = incidents$lng,
-    lat = incidents$lat
-  )
-
-library(usethis)
-
-use_git_config(
-  user.name = "Bailey Kirk",
-  user.email = "0_recheck.sugar@icloud.com"
-)
+##### Salary Data ###########
 
 
-
-
+salary <- read.csv("Data salary/ds_salaries.csv")
 
 
 
 
-
-
-
-
-
-
+##### UCR Data ##############
 
 
 

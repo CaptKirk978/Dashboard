@@ -36,7 +36,7 @@ ui = dashboardPage(
         icon = icon("map"),
         menuSubItem(
           text = "Crime Points",
-          tabName = "crimeMap1",
+          tabName = "crimePoints",
           icon = icon("map-location-dot")
         ),
         menuSubItem(
@@ -54,12 +54,22 @@ ui = dashboardPage(
         h1("hello")
       ),
       tabItem(
-        tabName = "crimeMap1",
-        h1("hello2")
+        tabName = "crimePoints",
+        leafletOutput("mapWithPoints", height = 700),
+        absolutePanel(top = 30, 
+                      right = 10,
+                      dateRangeInput("mapRange",
+                                     "Date Range: ",
+                                     start = max(rawIncidents$date),
+                                     end = max(rawIncidents$date),
+                                     min = min(rawIncidents$date),
+                                     max = max(rawIncidents$date)
+                      )
+          )
       ),
       tabItem(
         tabName = "crimeMap2",
-        h1("hello2")
+        h1("hello3")
       )
     )
   ),
