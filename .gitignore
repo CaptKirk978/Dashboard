@@ -2,4 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+.gitignore
+.DS_Store
+Incidents/.DS_Store
 Incidents/
