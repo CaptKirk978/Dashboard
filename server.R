@@ -1,9 +1,10 @@
 
 server = function(input, output) {
   
-  output$mapWithPoints <- renderLeaflet({
+  output$map_with_points <- renderLeaflet({
     map <- incidents %>% 
-      filter(`date` >= input$mapRange[1], `date` <= input$mapRange[2])
+      filter(`date` >= input$mapRange[1], `date` <= input$mapRange[2]) %>% 
+      filter(parentIncidentTypeId %in% c(input$crime_filter))
     
     leaflet(data = map) %>% 
       addTiles() %>% 
@@ -11,16 +12,18 @@ server = function(input, output) {
         lng = as.numeric(map$Long),
         lat = as.numeric(map$Lat),
         radius = 5,
-        popup = paste(map$Agency,
+        popup = paste(map$parentIncidentType,
                       "<br>",
-                      map$parentIncidentType,
+                      map$Address,
                       "<br>",
-                      map$Address
+                      map$date
                       ),
         clusterOptions = markerClusterOptions()
       )
     
   })
+  
+  
   
   
 }

@@ -2,6 +2,8 @@ library(tidyr)
 library(httr)
 library(jsonlite)
 library(dplyr)
+library(stringr)
+library(vroom)
 
 ######## http://cityprotect.com #########
 #                                       #
@@ -15,12 +17,11 @@ library(dplyr)
 #                                       #
 #########################################
 
+## Part 1 ##
 
 # select date range and change as needed, can not go back further than 1 year from today
-fromDate <- '"2021-09-05T00:00:00.000Z"'
-toDate <- '"2021-10-13T23:59:59.999Z"'
-
-
+fromDate <- '"2023-03-01T00:00:00.000Z"'
+toDate <- '"2023-05-01T23:59:59.999Z"'
 
 # api URL
 url <- "https://ce-portal-service.commandcentral.com/api/v1.0/public/incidents"
@@ -57,7 +58,7 @@ requestCount <- 2
 
 while (incidentCount > 0) {
   
-  print(paste0("Loading Request: #", requestCount, "at ", format(Sys.time(), "%H:%M:%S")))
+  print(paste0("Loading Request: #", requestCount, " at ", format(Sys.time(), "%H:%M:%S")))
   
   # adding to the request count
   requestCount <- requestCount + 1
@@ -88,8 +89,40 @@ while (incidentCount > 0) {
 output <- totalIncidents %>% 
   distinct(`id`, .keep_all = T)
 
+# cleaning up coordinates 
+output$location$coordinates <- gsub("\\(", "", output$location$coordinates)
+output$location$coordinates <- gsub("\\)", "", output$location$coordinates)
+output$location$coordinates <- gsub("c", "", output$location$coordinates)
+
+# separate coordinates into respective columns
+output[c('Long', 'Lat')] <- str_split_fixed(output$location$coordinates, ',', 2)
+
+# info
 print(paste("Finished with", nrow(output), "incidents logged"))
 
 # saving output
-write.csv(output, "./indy/incidents/indyIncidents_sep2021-oct2022.csv", row.names = F)
+write.csv(output, paste0("./Incidents/Raw Incidents/indyIncidents_", fromDate, "-", toDate, ".csv"), row.names = F)
+
+
+## Part 2 ## Create master data set
+
+# List all scraped data
+raw_data <- list.files(path = "./Incidents/Raw Incidents/", full.names = TRUE, pattern = ".csv")
+
+# combine all data sets
+master <- vroom(raw_data)
+
+# cleaning up coordinates if needed
+master$location.coordinates <- gsub("\\(", "", master$location.coordinates)
+master$location.type <- gsub("\\)", "", master$location.type)
+master$location.coordinates <- gsub("c", "", master$location.coordinates)
+
+master <- master %>% 
+  rename("Long" = "location.coordinates",
+         "Lat" = "location.type")
+
+# write master data set for dashboard
+write.csv(., "./Incidents/master_incidents.csv", row.names = F)
+
+
 

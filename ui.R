@@ -11,7 +11,6 @@
 #dashboard content
 ui = dashboardPage(
   title = "Bailey Kirk's Dashboard",
-  scrollToTop = T,
   fullscreen = T,
   header = dashboardHeader(
     title = dashboardBrand(
@@ -25,59 +24,40 @@ ui = dashboardPage(
     collapsed = F,
     sidebarMenu(
       id = "sidebarmenu",
-      sidebarHeader("Dashboards"),
-      menuItem(
-        "Data Analyst Salaries",
-        tabName = "salary",
-        icon = icon("money-bill-trend-up")
-      ),
-      menuItem(
-        "Crime Map",
-        icon = icon("map"),
-        menuSubItem(
-          text = "Crime Points",
-          tabName = "crimePoints",
-          icon = icon("map-location-dot")
-        ),
-        menuSubItem(
-          text = "Crime Areas",
-          tabName = "crimeMap2",
-          icon = icon("layer-group")
-        )
-      )
-    )
+      sidebarHeader("Crime Map"),
+      menuItem("Crime Filters",
+               checkboxGroupInput("crime_filter", label = h3("Options:"),
+                                  choices = list("Proactive Policing" = "Proactive Policing",
+                                                 "Quality of Life" = "Quality of Life",
+                                                 "Property Crime" = "Property Crime",
+                                                 "Breaking & Entering" = "Breaking & Entering",
+                                                 "Fire" = "Fire",
+                                                 "Robbery" = "Robbery",
+                                                 "Assault" = "Assault",
+                                                 "Theft" = "Theft",
+                                                 "Theft of Vehicle" = "Theft of Vehicle",
+                                                 "Theft from Vehicle" = "Theft from Vehicle",
+                                                 "Emergency" = "Emergency",
+                                                 "Sexual Offense" = "Sexual Offense",
+                                                 "Homicide" = "Homicide",
+                                                 "Community Policing" = "Community Policing"),
+                                  selected = unique(incidents$parentIncidentTypeId)
+                                  )
+              )
+            )
   ),
   body = dashboardBody(
-    tabItems(
-      tabItem(
-        tabName = "salary",
-        h1("hello")
-      ),
-      tabItem(
-        tabName = "crimePoints",
-        leafletOutput("mapWithPoints", height = 700),
+        leafletOutput("map_with_points", height = 700),
         absolutePanel(top = 30, 
                       right = 10,
                       dateRangeInput("mapRange",
                                      "Date Range: ",
-                                     start = max(rawIncidents$date),
-                                     end = max(rawIncidents$date),
-                                     min = min(rawIncidents$date),
-                                     max = max(rawIncidents$date)
+                                     start = max(incidents$date),
+                                     end = max(incidents$date),
+                                     min = min(incidents$date),
+                                     max = max(incidents$date)
                       )
           )
-      ),
-      tabItem(
-        tabName = "crimeMap2",
-        h1("hello3")
-      )
-    )
-  ),
-  controlbar = dashboardControlbar(
-    
-  ),
-  footer = dashboardFooter(
-    
   )
 )
 
